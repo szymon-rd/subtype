@@ -6,7 +6,7 @@ import scala.language.experimental.macros
 import scala.reflect.ClassTag
 
 
-object Macros1 {
+object Macros {
 
   trait SubsetCondition[T, R] {
     def condition(t: T): Boolean
@@ -28,14 +28,6 @@ object Macros1 {
   }) with SubsetCondition[T, R]
 
 
-  type EvenInt <: Int
-  implicit val EvenIntCondition = new SubsetCondition[Int, EvenInt] {
-    def condition(t: Int): Boolean = t % 2 == 0
-  }
-  implicit val EvenIntDefinition = new SubsetConverter[Int, EvenInt](EvenIntCondition)
-
-  type LowerCaseString <: String
-  implicit val LowerCaseStringDefinition = new SubsetConverterWithCondition[String, LowerCaseString](_.forall(_.isLower))
 
 
   //User classes:
@@ -50,10 +42,16 @@ object Macros1 {
 
 
   type UpperCaseString <: String
-  implicit val UpperCaseString = Definition[String, UpperCaseString](_.forall(_.isUpper))
+  implicit val UpperCaseStringDef = Definition[String, UpperCaseString](_.forall(_.isUpper))
 
   type FirstHuman <: String
-  implicit val FirstHuman = OneOf[String, FirstHuman]("adam", "Eve")
+  implicit val FirstHumanDef = OneOf[String, FirstHuman]("adam", "Eve")
+
+  type EvenInt <: Int
+  implicit val EvenIntCondition = Definition[Int, EvenInt](_ % 2 == 0)
+
+  type LowerCaseString <: String
+  implicit val LowerCaseStringDefinition = Definition[String, UpperCaseString](_.forall(_.isUpper))
 
   def convertToSubset_impl[T : c.WeakTypeTag, R : c.WeakTypeTag](c: Context)(i: c.Expr[T]): c.Expr[R] = {
     import c.universe._
